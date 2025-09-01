@@ -14,21 +14,7 @@ exports.authenticate = async (req, res, next) => {
       });
     }
 
-    // Extract token
-    const token = authHeader.substring(7);
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-
-    // Find user
-    const user = await User.findById(decoded._id).select('-password');
     
-    if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'User not found' 
-      });
-    }
 
     // Check if user is active
     if (!user.isActive) {
@@ -136,6 +122,23 @@ exports.isOwnerOrAdmin = (model) => {
         });
       }
 
+
+// Extract token
+    const token = authHeader.substring(7);
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+
+    // Find user
+    const user = await User.findById(decoded._id).select('-password');
+    
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+      
       // Check if user is admin or owner
       const isAdmin = req.user.role === 'admin';
       const isOwner = resource.organizer && 
