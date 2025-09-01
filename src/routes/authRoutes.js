@@ -80,6 +80,15 @@ router.post('/refresh-token', (req, res) => {
   }
 });
 
+
+
+router.put('/profile', authenticate, authController.updateProfile);
+router.post('/change-password', authenticate, changePasswordValidation, authController.changePassword);
+router.post('/logout', authenticate, (req, res) => {
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
+
 // Protected routes
 router.get('/profile', authenticate, (req, res) => {
   if (mongoose.connection.readyState === 1) {
@@ -87,12 +96,6 @@ router.get('/profile', authenticate, (req, res) => {
   } else {
     mockAuthController.mockGetProfile(req, res);
   }
-});
-
-router.put('/profile', authenticate, authController.updateProfile);
-router.post('/change-password', authenticate, changePasswordValidation, authController.changePassword);
-router.post('/logout', authenticate, (req, res) => {
-  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 module.exports = router;
