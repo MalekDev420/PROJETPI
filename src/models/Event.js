@@ -244,17 +244,7 @@ eventSchema.methods.isUserRegistered = function(userId) {
   return this.registrations.some(reg => reg.user.toString() === userId.toString());
 };
 
-// Method to register user
-eventSchema.methods.registerUser = function(userId) {
-  if (this.isFull) {
-    throw new Error('Event is full');
-  }
-  if (this.isUserRegistered(userId)) {
-    throw new Error('User already registered');
-  }
-  this.registrations.push({ user: userId });
-  return this.save();
-};
+
 
 // Method to unregister user
 eventSchema.methods.unregisterUser = function(userId) {
@@ -268,3 +258,16 @@ eventSchema.methods.unregisterUser = function(userId) {
 eventSchema.set('toJSON', { virtuals: true });
 
 module.exports = mongoose.model('Event', eventSchema);
+
+
+// Method to register user
+eventSchema.methods.registerUser = function(userId) {
+  if (this.isFull) {
+    throw new Error('Event is full');
+  }
+  if (this.isUserRegistered(userId)) {
+    throw new Error('User already registered');
+  }
+  this.registrations.push({ user: userId });
+  return this.save();
+};
