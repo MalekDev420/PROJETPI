@@ -24,31 +24,7 @@ exports.authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user to request
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid token' 
-      });
-    }
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Token has expired' 
-      });
-    }
-    
-    console.error('Authentication error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Authentication error',
-      error: error.message 
-    });
-  }
-};
+   
 
 // Check if user has required role
 exports.authorize = (...roles) => {
@@ -186,5 +162,31 @@ exports.optionalAuth = async (req, res, next) => {
   } catch (error) {
     // Continue without authentication
     next();
+  }
+};
+
+   // Attach user to request
+    req.user = user;
+    next();
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid token' 
+      });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Token has expired' 
+      });
+    }
+    
+    console.error('Authentication error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Authentication error',
+      error: error.message 
+    });
   }
 };
