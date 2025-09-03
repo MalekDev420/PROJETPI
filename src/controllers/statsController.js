@@ -2,6 +2,59 @@ const Event = require('../models/Event');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 
+
+
+
+// Get events by time of day
+    const eventsByTimeOfDay = await Event.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: { $hour: '$startDate' },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          hour: '$_id',
+          timeRange: {
+            $switch: {
+              branches: [
+                { case: { $lt: ['$_id', 6] }, then: 'Early Morning' },
+                { case: { $lt: ['$_id', 12] }, then: 'Morning' },
+                { case: { $lt: ['$_id', 17] }, then: 'Afternoon' },
+                { case: { $lt: ['$_id', 21] }, then: 'Evening' },
+                { case: { $gte: ['$_id', 21] }, then: 'Night' }
+              ]
+            }
+          },
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        eventsByStatus,
+        averageAttendanceRate,
+        eventsByDayOfWeek,
+        eventsByTimeOfDay,
+        totalEvents: await Event.countDocuments({ createdAt: { $gte: startDate } })
+      }
+    });
+  } catch (error) {
+    console.error('Get event analytics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching event analytics',
+      error: error.message
+    });
+  }
+};
+
 // Get comprehensive reports data
 exports.getReports = async (req, res) => {
   try {
@@ -439,52 +492,4 @@ exports.getEventAnalytics = async (req, res) => {
       }
     ]);
     
-    // Get events by time of day
-    const eventsByTimeOfDay = await Event.aggregate([
-      { $match: { createdAt: { $gte: startDate } } },
-      {
-        $group: {
-          _id: { $hour: '$startDate' },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } },
-      {
-        $project: {
-          hour: '$_id',
-          timeRange: {
-            $switch: {
-              branches: [
-                { case: { $lt: ['$_id', 6] }, then: 'Early Morning' },
-                { case: { $lt: ['$_id', 12] }, then: 'Morning' },
-                { case: { $lt: ['$_id', 17] }, then: 'Afternoon' },
-                { case: { $lt: ['$_id', 21] }, then: 'Evening' },
-                { case: { $gte: ['$_id', 21] }, then: 'Night' }
-              ]
-            }
-          },
-          count: 1,
-          _id: 0
-        }
-      }
-    ]);
     
-    res.status(200).json({
-      success: true,
-      data: {
-        eventsByStatus,
-        averageAttendanceRate,
-        eventsByDayOfWeek,
-        eventsByTimeOfDay,
-        totalEvents: await Event.countDocuments({ createdAt: { $gte: startDate } })
-      }
-    });
-  } catch (error) {
-    console.error('Get event analytics error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching event analytics',
-      error: error.message
-    });
-  }
-};
